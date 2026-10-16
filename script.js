@@ -513,21 +513,33 @@ function initComparisonSelectors() {
     const select2 = document.getElementById("compare-item-2");
     if (!select1 || !select2) return;
 
-    const optionsHtml = commodities.map((c, i) => 
+    const val1 = select1.value;
+    const val2 = select2.value;
+
+    const optionsHtml = commodities.map((c) => 
         `<option value="${c.id || c.name}">${c.emoji} ${c.name} (₹${c.currentPrice})</option>`
     ).join('');
 
     select1.innerHTML = optionsHtml;
     select2.innerHTML = optionsHtml;
 
-    // Default: first and third (e.g. Rice and Onion)
-    if (commodities.length > 2) {
+    if (val1 && commodities.some(c => (c.id || c.name) === val1)) {
+        select1.value = val1;
+    } else if (commodities.length > 0) {
         select1.value = commodities[0].id || commodities[0].name;
+    }
+
+    if (val2 && commodities.some(c => (c.id || c.name) === val2)) {
+        select2.value = val2;
+    } else if (commodities.length > 2) {
         select2.value = commodities[2].id || commodities[2].name;
     }
 
-    select1.addEventListener("change", updateComparison);
-    select2.addEventListener("change", updateComparison);
+    if (!select1.dataset.hasListener) {
+        select1.dataset.hasListener = "true";
+        select1.addEventListener("change", updateComparison);
+        select2.addEventListener("change", updateComparison);
+    }
 
     updateComparison();
 }
@@ -653,6 +665,10 @@ function renderComparisonChart(c1, c2) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            resizeDelay: 200,
+            animation: {
+                duration: 250
+            },
             interaction: { mode: "index", intersect: false },
             plugins: {
                 legend: {
@@ -828,12 +844,18 @@ function initChartDropdown() {
     const select = document.getElementById("commodity-select");
     if (!select) return;
 
+    const prevIndex = select.value || 0;
     select.innerHTML = commodities.map((c, i) => 
         `<option value="${i}">${c.emoji} ${c.name} (Current: ₹${c.currentPrice})</option>`
     ).join('');
 
-    select.addEventListener("change", () => updateTrendChart(select.value));
-    updateTrendChart(0);
+    select.value = prevIndex < commodities.length ? prevIndex : 0;
+
+    if (!select.dataset.hasListener) {
+        select.dataset.hasListener = "true";
+        select.addEventListener("change", () => updateTrendChart(select.value));
+    }
+    updateTrendChart(select.value);
 }
 
 function updateTrendChart(index) {
@@ -892,6 +914,10 @@ function updateTrendChart(index) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            resizeDelay: 200,
+            animation: {
+                duration: 250
+            },
             interaction: { mode: "index", intersect: false },
             plugins: {
                 legend: {
