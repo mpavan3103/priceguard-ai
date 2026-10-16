@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PriceGuard AI — Commodity Price Intelligence & Reasonability System</title>
+    <meta name="description" content="AI/ML powered market intelligence platform for commodity price estimation, reasonability scoring, price comparison, and manipulation detection.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Top Global Announcement & Data Transparency Banner -->
+    <aside class="data-transparency-banner" role="complementary" aria-label="Data Source Notice">
+        <div class="banner-content">
+            <span class="banner-badge">PORTFOLIO DEMONSTRATION</span>
+            <p>
+                <strong>Data Transparency:</strong> Current prices are based on official historical market benchmark datasets (eNAM &amp; AGMARKNET). Real-time mandi scrapers and webhooks are demonstrated via the live ML analysis pipeline.
+            </p>
+        </div>
+    </aside>
+
+    <!-- Navigation Header -->
+    <header class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="#dashboard" class="logo" aria-label="PriceGuard AI Home">
+                    <span class="logo-icon" aria-hidden="true">🛡️</span>
+                    <div class="logo-text">
+                        <span class="brand-title">PriceGuard <span class="highlight">AI</span></span>
+                        <span class="tagline">Commodity Price Reasonability &amp; Anomaly Tracker</span>
+                    </div>
+                </a>
+            </div>
+
+            <nav class="nav-links" id="nav-links" aria-label="Primary Navigation">
+                <a href="#commodities" class="nav-link">Commodities</a>
+                <a href="#comparison" class="nav-link">Compare Prices</a>
+                <a href="#simulator" class="nav-link">AI Simulator</a>
+                <a href="#trends" class="nav-link">Trend Charts</a>
+                <a href="#watchlist" class="nav-link">Watchlist &amp; Alerts</a>
+                <a href="#architecture" class="nav-link">Architecture</a>
+            </nav>
+
+            <div class="nav-actions">
+                <div class="nav-status" id="backend-status" title="Connection status to Python ML server" role="status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Connecting...</span>
+                </div>
+                <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle navigation menu" aria-expanded="false">
+                    ☰
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" id="dashboard">
+        <!-- Hero & Overview Header -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <span class="section-tag">AUTOMATED MARKET OVERSIGHT</span>
+                <h1>Empowering Transparent &amp; Fair Commodity Pricing</h1>
+                <p>
+                    PriceGuard AI uses ensemble machine learning (Isolation Forest &amp; Z-score analysis) to evaluate market reasonability, detect artificial price gouging, and protect consumer welfare.
+                </p>
+            </div>
+
+            <!-- Stats Overview Cards -->
+            <div class="stats-overview" id="stats-overview" aria-label="Market Overview Statistics"></div>
+        </section>
+
+        <!-- Commodity Catalog & Filter Section -->
+        <section class="section" id="commodities">
+            <div class="section-header-row">
+                <div class="section-header">
+                    <h2>📦 Essential Commodities</h2>
+                    <p>Live reasonability analysis, dynamic fair value bands, and anomaly statuses</p>
+                </div>
+
+                <div class="catalog-controls">
+                    <!-- Search Input -->
+                    <div class="search-box">
+                        <span class="search-icon" aria-hidden="true">🔍</span>
+                        <input 
+                            type="search" 
+                            id="commodity-search" 
+                            class="search-input" 
+                            placeholder="Search by name (e.g. Onion, Rice)..."
+                            aria-label="Search commodities"
+                        >
+                    </div>
+
+                    <!-- Sort Select -->
+                    <div class="sort-box">
+                        <label for="commodity-sort" class="sr-only">Sort Commodities</label>
+                        <select id="commodity-sort" class="select-input">
+                            <option value="default">Sort: Default</option>
+                            <option value="score-asc">Reasonability: Lowest (Most Inflated)</option>
+                            <option value="score-desc">Reasonability: Highest (Fair)</option>
+                            <option value="price-asc">Price: Low to High</option>
+                            <option value="price-desc">Price: High to Low</option>
+                            <option value="name-asc">Name: A to Z</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Filter Tabs -->
+            <div class="filter-pills" id="category-filters" role="tablist" aria-label="Category Filters">
+                <button class="filter-pill active" data-category="all" role="tab" aria-selected="true">All Items</button>
+                <button class="filter-pill" data-category="Grains" role="tab" aria-selected="false">🌾 Grains</button>
+                <button class="filter-pill" data-category="Vegetables" role="tab" aria-selected="false">🧅 Vegetables</button>
+                <button class="filter-pill" data-category="Dairy" role="tab" aria-selected="false">🥛 Dairy</button>
+                <button class="filter-pill" data-category="Essentials" role="tab" aria-selected="false">🍬 Essentials</button>
+                <button class="filter-pill alert-pill" data-category="anomalies" role="tab" aria-selected="false">🚨 High Anomalies</button>
+            </div>
+
+            <!-- Commodity Grid -->
+            <div class="commodity-grid" id="commodity-grid" aria-live="polite"></div>
+            <div class="empty-state hidden" id="empty-state">
+                <span class="empty-icon">🔎</span>
+                <h3>No matching commodities found</h3>
+                <p>Try adjusting your search query or selected category filter.</p>
+                <button class="btn btn-secondary" id="reset-filters-btn">Reset All Filters</button>
+            </div>
+        </section>
+
+        <!-- Product Price Comparison Tool -->
+        <section class="section" id="comparison">
+            <div class="section-header">
+                <h2>⚖️ Side-by-Side Price Comparison</h2>
+                <p>Compare two commodities across pricing, fair bounds, volatility, and trend trajectories</p>
+            </div>
+
+            <div class="comparison-card">
+                <div class="comparison-selectors">
+                    <div class="selector-group">
+                        <label for="compare-item-1">First Commodity:</label>
+                        <select id="compare-item-1" class="select-input comparison-select"></select>
+                    </div>
+                    <div class="compare-divider">VS</div>
+                    <div class="selector-group">
+                        <label for="compare-item-2">Second Commodity:</label>
+                        <select id="compare-item-2" class="select-input comparison-select"></select>
+                    </div>
+                </div>
+
+                <!-- Comparison Matrix Table -->
+                <div class="comparison-table-wrapper">
+                    <table class="comparison-table" id="comparison-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Metric</th>
+                                <th scope="col" id="col-head-1">Commodity 1</th>
+                                <th scope="col" id="col-head-2">Commodity 2</th>
+                                <th scope="col">AI Assessment</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparison-table-body">
+                            <!-- Injected by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Dual Price Chart Overlay -->
+                <div class="comparison-chart-wrapper">
+                    <h3 class="chart-subtitle">Historical Price Comparison (Past 12 Months)</h3>
+                    <canvas id="comparisonChart" aria-label="Dual commodity price trend comparison chart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive AI Price Simulator -->
+        <section class="section" id="simulator">
+            <div class="section-header">
+                <h2>🧪 AI Price Reasonability Simulator</h2>
+                <p>Test the machine learning engine: Input any custom price to see how the model diagnoses it in real time</p>
+            </div>
+
+            <div class="simulator-card">
+                <form class="simulator-form" id="simulator-form" onsubmit="return false;">
+                    <div class="form-group">
+                        <label for="sim-commodity">Choose Commodity:</label>
+                        <select id="sim-commodity" class="select-input" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sim-price">Enter Custom Price (₹):</label>
+                        <input type="number" id="sim-price" class="text-input" placeholder="e.g. 85" min="1" max="10000" step="any" required>
+                    </div>
+                    <div class="form-group form-actions">
+                        <button type="submit" class="btn btn-primary" id="sim-eval-btn">
+                            ⚡ Evaluate Reasonability
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Simulator Output Panel -->
+                <div class="simulator-result" id="simulator-result">
+                    <div class="result-placeholder">
+                        <span class="placeholder-icon">🤖</span>
+                        <p>Select a commodity, enter a custom price above, and run the ML evaluation.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Detailed Historical Price Trend Chart -->
+        <section class="section" id="trends">
+            <div class="section-header">
+                <h2>📈 Historical Price Trends &amp; Bounds</h2>
+                <p>Evaluate actual commodity price trajectories against AI estimated fair range boundaries</p>
+            </div>
+            <div class="chart-container">
+                <div class="chart-controls">
+                    <div class="chart-control-group">
+                        <label for="commodity-select">Inspect Commodity:</label>
+                        <select id="commodity-select" class="select-input"></select>
+                    </div>
+                    <div class="chart-legend-badges">
+                        <span class="legend-badge legend-actual"><span class="legend-dot"></span> Actual Price</span>
+                        <span class="legend-badge legend-max"><span class="legend-dash"></span> Fair Ceiling (Mean + 1σ)</span>
+                        <span class="legend-badge legend-min"><span class="legend-dash"></span> Fair Floor (Mean - 1σ)</span>
+                    </div>
+                </div>
+                <div class="canvas-wrapper">
+                    <canvas id="priceChart" aria-label="Commodity price history and fair price range chart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Custom Price Watchlist & Alert Subscriptions -->
+        <section class="section" id="watchlist">
+            <div class="section-header-row">
+                <div class="section-header">
+                    <h2>🔔 Price Tracking &amp; Drop Alerts</h2>
+                    <p>Track commodities and trigger alerts when prices drop below your desired target</p>
+                </div>
+                <button class="btn btn-outline" id="simulate-drop-btn" title="Simulate a price drop event to test alert triggers">
+                    🎲 Simulate Market Drop
+                </button>
+            </div>
+
+            <div class="watchlist-grid">
+                <!-- Add Alert Card -->
+                <div class="watchlist-form-card">
+                    <h3>Create New Price Alert</h3>
+                    <p class="card-subtitle">Set your threshold and receive notifications when market benchmarks align.</p>
+                    <form id="add-alert-form" class="alert-form">
+                        <div class="form-group">
+                            <label for="alert-commodity">Commodity:</label>
+                            <select id="alert-commodity" class="select-input" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="alert-type">Trigger Condition:</label>
+                            <select id="alert-type" class="select-input" required>
+                                <option value="below">Price drops below target</option>
+                                <option value="above">Price exceeds fair ceiling</option>
+                                <option value="fair">Reasonability enters "Fair" range</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="alert-price">Target Price (₹):</label>
+                            <input type="number" id="alert-price" class="text-input" placeholder="e.g. 40" min="1" step="any" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Set Price Alert</button>
+                    </form>
+                </div>
+
+                <!-- Active Tracked Items List -->
+                <div class="watchlist-items-card">
+                    <div class="card-header-flex">
+                        <h3>Active Price Watchlist</h3>
+                        <span class="badge badge-neutral" id="watchlist-count">0 items</span>
+                    </div>
+                    <div class="watchlist-items-list" id="watchlist-items-list" aria-live="polite">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Anomaly Detection Alerts Feed -->
+        <section class="section" id="alerts">
+            <div class="section-header">
+                <h2>🚨 Market Anomaly Feed</h2>
+                <p>Real-time notifications generated by the Isolation Forest &amp; statistical deviation detector</p>
+            </div>
+            <div class="alerts-container" id="alerts-container" aria-live="polite"></div>
+        </section>
+
+        <!-- System Architecture Workflow -->
+        <section class="section" id="architecture">
+            <div class="section-header">
+                <h2>⚙️ System Architecture &amp; Analytics Pipeline</h2>
+                <p>How market data flows from raw mandi benchmarks to machine learning evaluation</p>
+            </div>
+            <div class="pipeline">
+                <div class="pipeline-step">
+                    <div class="step-icon">📥</div>
+                    <h3>1. Data Ingestion</h3>
+                    <p>Collect raw wholesale mandi price time-series (eNAM / AGMARKNET sources).</p>
+                </div>
+                <div class="pipeline-arrow" aria-hidden="true">→</div>
+                <div class="pipeline-step">
+                    <div class="step-icon">📊</div>
+                    <h3>2. Statistical Limits</h3>
+                    <p>Calculate dynamic mean &mu;, standard deviation &sigma;, and fair boundary brackets.</p>
+                </div>
+                <div class="pipeline-arrow" aria-hidden="true">→</div>
+                <div class="pipeline-step">
+                    <div class="step-icon">🤖</div>
+                    <h3>3. Isolation Forest ML</h3>
+                    <p>Unsupervised outlier modeling isolates multidimensional pricing anomalies.</p>
+                </div>
+                <div class="pipeline-arrow" aria-hidden="true">→</div>
+                <div class="pipeline-step">
+                    <div class="step-icon">📈</div>
+                    <h3>4. Trend &amp; Volatility</h3>
+                    <p>Linear regression slopes separate structural inflation from temporary price spikes.</p>
+                </div>
+                <div class="pipeline-arrow" aria-hidden="true">→</div>
+                <div class="pipeline-step">
+                    <div class="step-icon">🛡️</div>
+                    <h3>5. Decision &amp; Alerts</h3>
+                    <p>Calculates Reasonability Score (0-100) and broadcasts prioritized market alerts.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- UN SDG Goals Alignment -->
+        <section class="section" id="sdgs">
+            <div class="section-header">
+                <h2>🌍 Sustainable Development Goals (SDGs)</h2>
+                <p>PriceGuard AI directly advances the United Nations 2030 Sustainable Development Agenda</p>
+            </div>
+            <div class="sdg-grid">
+                <article class="sdg-card sdg-1">
+                    <div class="sdg-number">SDG 1</div>
+                    <h3>No Poverty</h3>
+                    <p>Protects vulnerable and low-income households from predatory inflation and artificial price gouging on essential staple foods.</p>
+                </article>
+                <article class="sdg-card sdg-8">
+                    <div class="sdg-number">SDG 8</div>
+                    <h3>Decent Work &amp; Economic Growth</h3>
+                    <p>Fosters transparent, equitable market environments that protect ethical producers while preventing cartels and hoarding.</p>
+                </article>
+                <article class="sdg-card sdg-12">
+                    <div class="sdg-number">SDG 12</div>
+                    <h3>Responsible Consumption &amp; Production</h3>
+                    <p>Provides data-driven supply chain accountability from agricultural mandis to consumer retail points.</p>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <!-- Product Details Modal Window -->
+    <div class="modal-overlay hidden" id="product-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-product-name">
+        <div class="modal-card">
+            <button class="modal-close-btn" id="modal-close-btn" aria-label="Close details modal">&times;</button>
+            <div class="modal-body" id="modal-body">
+                <!-- Content injected by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast Container -->
+    <div class="toast-container" id="toast-container" aria-live="assertive"></div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-col">
+                <div class="logo">
+                    <span class="logo-icon" aria-hidden="true">🛡️</span>
+                    <span class="brand-title">PriceGuard <span class="highlight">AI</span></span>
+                </div>
+                <p class="footer-desc">Automated price estimation, reasonability benchmarking, and market manipulation detection platform.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Quick Navigation</h4>
+                <ul class="footer-links">
+                    <li><a href="#commodities">Commodity Catalog</a></li>
+                    <li><a href="#comparison">Compare Products</a></li>
+                    <li><a href="#simulator">AI Price Simulator</a></li>
+                    <li><a href="#watchlist">Custom Alerts</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Data &amp; Methodology</h4>
+                <ul class="footer-links">
+                    <li><a href="#architecture">Architecture Pipeline</a></li>
+                    <li><a href="#sdgs">UN SDG Alignment</a></li>
+                    <li><span class="footer-note">Benchmarks: eNAM, AGMARKNET</span></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 PriceGuard AI &bull; Created for Portfolio &amp; Public Demonstration</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
