@@ -1,25 +1,30 @@
 # 🛡️ PriceGuard AI — Commodity Price Intelligence & Reasonability System
 
-A full-stack, machine-learning-driven price monitoring platform designed to evaluate commodity market reasonability, detect artificial price manipulation, compare products side-by-side, and track price-drop alerts.
+A machine-learning-driven price monitoring platform designed to evaluate commodity market reasonability, detect artificial price manipulation, compare products side-by-side, and track price-drop alerts.
 
+[![GitHub Pages](https://img.shields.io/badge/Live_Demo-GitHub_Pages-blue?logo=github)](https://mpavan3103.github.io/priceguard-ai/)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Python](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python)
-![Flask](https://img.shields.io/badge/Backend-Flask-lightgrey?logo=flask)
-![ML](https://img.shields.io/badge/ML-Scikit--Learn-orange?logo=scikit-learn)
-![Frontend](https://img.shields.io/badge/Frontend-HTML5%20%7C%20CSS3%20%7C%20Chart.js-teal)
+![Frontend](https://img.shields.io/badge/Frontend-HTML5%20%7C%20CSS3%20%7C%20Vanilla%20JS-teal)
+![Charts](https://img.shields.io/badge/Visualization-Chart.js%204.4-yellow)
+![Python](https://img.shields.io/badge/Backend-Python%20Flask-blue?logo=python)
+![ML](https://img.shields.io/badge/ML-Scikit--Learn%20Isolation%20Forest-orange?logo=scikit-learn)
+
+🌐 **Live Portfolio Website:** [https://mpavan3103.github.io/priceguard-ai/](https://mpavan3103.github.io/priceguard-ai/)
+
+> **Portfolio Notice:** The published website on GitHub Pages runs as a high-speed, client-side static application using verified historical market benchmark datasets (eNAM &amp; AGMARKNET). The standalone Python machine-learning backend (`app.py`, `ml_model.py`) is preserved in this repository for local execution and REST API integration.
 
 ---
 
 ## 🌟 Key Features
 
 - **Dynamic Fair Price Estimation:** Computes statistical equilibrium bounds ($\mu \pm 1\sigma$) dynamically from time-series mandi benchmarks.
-- **Ensemble Anomaly Detection:** Combines **Z-score** statistical deviations with **Scikit-learn Isolation Forest** models to catch artificial spikes and hoarding patterns.
+- **Ensemble Anomaly Detection:** Combines **Z-score** statistical deviations with **Scikit-learn Isolation Forest** modeling to detect artificial spikes and hoarding patterns.
 - **Side-by-Side Product Comparison:** Compare any two commodities side-by-side with metric comparison tables and dual-line Chart.js historical overlays.
-- **Interactive AI Price Simulator:** Allows visitors and recruiters to enter any custom price for any commodity and receive instant ML reasonability ratings and diagnoses.
-- **Real-Time Search & Category Filters:** Instant keystroke search and multi-category filtering (Grains, Vegetables, Dairy, Essentials, and High Anomalies).
+- **Interactive AI Price Simulator:** Allows visitors and recruiters to enter any custom price for any commodity and receive instant reasonability ratings and diagnoses in real time.
+- **Real-Time Search & Category Filters:** Keystroke search and category filtering across Grains, Vegetables, Dairy, Essentials, and High Anomalies.
 - **Custom Price Tracking & Drop Alerts:** Interactive watchlist stored in `localStorage` with automated condition checks and simulation triggers.
-- **Product Details Modal:** Detailed view showing 12-month highs/lows, volatility indices (Coefficient of Variation), and complete pricing histories.
-- **100% Portfolio Resilience:** Features a dual-mode client engine that connects to the live Flask backend when available, while providing seamless client-side calculations and benchmark data if cloud instances are sleeping.
+- **Product Details Modal:** Detailed breakdown showing 12-month highs/lows, volatility indices (Coefficient of Variation), and complete monthly price trajectories.
+- **100% Static & Serverless Ready:** Works directly on GitHub Pages with zero external backend runtime required.
 
 ---
 
@@ -96,17 +101,38 @@ http://localhost:5000
 
 ---
 
-## 🌐 Free Public Deployment (Render.com)
+## 🌐 Deployment Options
 
-1. Push this folder to a GitHub repository.
-2. In [Render.com](https://render.com), click **New + > Web Service** and select your repo.
-3. Settings:
+### Option 1: GitHub Pages (Recommended for Portfolio — 100% Free & Static)
+
+Because the site requires zero backend runtime on GitHub Pages:
+1. Push your changes to your GitHub repository:
+   ```bash
+   git add .
+   git commit -m "Configure PriceGuard AI for GitHub Pages"
+   git push origin main
+   ```
+2. In your GitHub repository:
+   - Go to **Settings** > **Pages**
+   - Under **Build and deployment**, set Source to **Deploy from a branch**
+   - Branch: **`main`**, Folder: **`/ (root)`**
+   - Click **Save**
+3. Your live application will be available at:  
+   **[https://mpavan3103.github.io/priceguard-ai/](https://mpavan3103.github.io/priceguard-ai/)**
+
+---
+
+### Option 2: Render.com (Full Python ML Backend Web Service)
+
+If you also want to expose the live Python Flask REST API:
+1. In [Render.com](https://render.com), click **New + > Web Service** and select your repo.
+2. Configure settings:
    - **Build Command:** `pip install -r requirements.txt`
    - **Start Command:** `gunicorn app:app`
    - **Instance Type:** `Free`
-4. Click **Deploy**. Your live site will be ready at `https://your-app-name.onrender.com`!
+3. Click **Deploy**. Your live Python API will be ready at `https://your-app-name.onrender.com`!
 
-*(Refer to [`DEPLOYMENT.md`](DEPLOYMENT.md) for detailed deployment walkthroughs).*
+*(See [`DEPLOYMENT.md`](DEPLOYMENT.md) for full walkthroughs).*
 
 ---
 

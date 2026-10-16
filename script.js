@@ -284,39 +284,17 @@ function saveWatchlist() {
 }
 
 // -----------------------------------------------------------------------------
-// 3. API FETCH & FALLBACK
+// 3. STATIC DEMONSTRATION INITIALIZATION (Zero Flask Backend Dependency)
 // -----------------------------------------------------------------------------
 
-async function syncWithAPI() {
+function initStaticMode() {
     const statusEl = document.getElementById("backend-status");
-    try {
-        const response = await fetch("/api/dashboard", { cache: "no-store" });
-        if (response.ok) {
-            const data = await response.json();
-            if (data.commodities && data.commodities.length > 0) {
-                commodities = data.commodities;
-            }
-            if (data.alerts && data.alerts.length > 0) {
-                alerts = data.alerts;
-            }
-            if (statusEl) {
-                statusEl.innerHTML = '<span class="status-dot"></span><span>ML Backend Active</span>';
-                statusEl.style.color = "var(--fair)";
-                statusEl.style.borderColor = "rgba(74, 222, 128, 0.3)";
-            }
-            return true;
-        }
-    } catch (error) {
-        // Backend offline or sleeping (e.g. Free Render instance waking up)
-        console.log("ℹ️ Server offline or sleeping. Operating in client-side benchmark demonstration mode.");
-    }
-
     if (statusEl) {
-        statusEl.innerHTML = '<span class="status-dot" style="background:var(--watch)"></span><span>Demo Mode • Benchmarks</span>';
-        statusEl.style.color = "var(--watch)";
-        statusEl.style.borderColor = "rgba(251, 191, 36, 0.3)";
+        statusEl.innerHTML = '<span class="status-dot" style="background:var(--fair)"></span><span>⚡ GitHub Pages Static Demo</span>';
+        statusEl.style.color = "var(--fair)";
+        statusEl.style.borderColor = "rgba(74, 222, 128, 0.3)";
+        statusEl.title = "Running 100% client-side in your browser using official benchmark datasets (eNAM & AGMARKNET). Standalone Python ML backend is preserved in the repository.";
     }
-    return false;
 }
 
 // -----------------------------------------------------------------------------
@@ -704,7 +682,7 @@ function initSimulator() {
     form.addEventListener("submit", handleSimulatePrice);
 }
 
-async function handleSimulatePrice(e) {
+function handleSimulatePrice(e) {
     if (e) e.preventDefault();
 
     const select = document.getElementById("sim-commodity");
@@ -721,71 +699,52 @@ async function handleSimulatePrice(e) {
         return;
     }
 
-    resultBox.innerHTML = `
-        <div style="text-align: center; padding: 20px;">
-            <p>⚡ Running machine learning reasonability analysis on ₹${testPrice}...</p>
-        </div>
-    `;
+    const item = commodities.find(c => (c.id || c.name) === commodityId) || commodities[0];
+    const h = item.history;
+    const mean = h.reduce((a, b) => a + b, 0) / h.length;
+    const variance = h.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / h.length;
+    const std = Math.sqrt(variance);
+    const minFair = Math.max(0, +(mean - std).toFixed(2));
+    const maxFair = +(mean + std).toFixed(2);
 
-    let evalResult = null;
+    let score = 70;
+    let diagnosis = "";
+    let status = "fair";
 
-    // Try backend API first
-    try {
-        const resp = await fetch(`/api/evaluate?id=${encodeURIComponent(commodityId)}&price=${testPrice}`);
-        if (resp.ok) {
-            evalResult = await resp.json();
-        }
-    } catch (err) {
-        // Fallback to client-side ML calculation
+    if (testPrice >= minFair && testPrice <= maxFair) {
+        const pos = (testPrice - minFair) / (maxFair - minFair || 1);
+        score = Math.round(95 - (pos * 10));
+        status = "fair";
+        diagnosis = `Price ₹${testPrice} falls within standard statistical equilibrium (₹${minFair} – ₹${maxFair}). Evaluated as fair.`;
+    } else if (testPrice < minFair) {
+        score = 95;
+        status = "fair";
+        const pctUnder = (((minFair - testPrice) / minFair) * 100).toFixed(1);
+        diagnosis = `Price ₹${testPrice} is ${pctUnder}% below standard benchmark floor (₹${minFair}). High consumer affordability.`;
+    } else {
+        const overPct = ((testPrice - maxFair) / maxFair) * 100;
+        score = Math.max(0, Math.round(80 - (overPct * 2)));
+        status = score < 50 ? "alert" : "watch";
+        diagnosis = `Price ₹${testPrice} exceeds the estimated fair ceiling (₹${maxFair}) by ${overPct.toFixed(1)}%. Potential artificial price inflation.`;
     }
 
-    // Client-side fallback calculation if API was sleeping
-    if (!evalResult) {
-        const item = commodities.find(c => (c.id || c.name) === commodityId) || commodities[0];
-        const h = item.history;
-        const mean = h.reduce((a, b) => a + b, 0) / h.length;
-        const variance = h.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / h.length;
-        const std = Math.sqrt(variance);
-        const minFair = Math.max(0, +(mean - std).toFixed(2));
-        const maxFair = +(mean + std).toFixed(2);
+    const zScore = +((testPrice - mean) / (std || 1)).toFixed(2);
 
-        let score = 70;
-        let diagnosis = "";
-        let status = "fair";
-
-        if (testPrice >= minFair && testPrice <= maxFair) {
-            const pos = (testPrice - minFair) / (maxFair - minFair);
-            score = Math.round(95 - (pos * 10));
-            status = "fair";
-            diagnosis = `Price ₹${testPrice} falls inside standard statistical equilibrium (₹${minFair} – ₹${maxFair}). Evaluated as fair.`;
-        } else if (testPrice < minFair) {
-            score = 95;
-            status = "fair";
-            diagnosis = `Price ₹${testPrice} is below the benchmark minimum (₹${minFair}). High affordability for consumers.`;
-        } else {
-            const overPct = ((testPrice - maxFair) / maxFair) * 100;
-            score = Math.max(0, Math.round(80 - (overPct * 2)));
-            status = score < 50 ? "alert" : "watch";
-            diagnosis = `Price ₹${testPrice} exceeds the fair ceiling of ₹${maxFair} by ${overPct.toFixed(1)}%. Potential artificial inflation.`;
-        }
-
-        const zScore = +((testPrice - mean) / (std || 1)).toFixed(2);
-
-        evalResult = {
-            commodity: item.name,
-            emoji: item.emoji,
-            unit: item.unit,
-            evaluatedPrice: testPrice,
-            currentBaseline: item.currentPrice,
-            fairMin: minFair,
-            fairMax: maxFair,
-            score: score,
-            status: status,
-            zScore: zScore,
-            isAnomaly: Math.abs(zScore) > 2.0 || score < 40,
-            diagnosis: diagnosis
-        };
-    }
+    const evalResult = {
+        commodity: item.name,
+        emoji: item.emoji,
+        unit: item.unit,
+        evaluatedPrice: testPrice,
+        currentBaseline: item.currentPrice,
+        fairMin: minFair,
+        fairMax: maxFair,
+        score: score,
+        status: status,
+        zScore: zScore,
+        isAnomaly: Math.abs(zScore) > 2.0 || score < 40,
+        volatility: item.volatility,
+        diagnosis: diagnosis
+    };
 
     renderSimulatorResult(evalResult);
 }
@@ -800,9 +759,12 @@ function renderSimulatorResult(res) {
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
             <div>
                 <h4 style="font-size: 18px; font-weight: 700;">${res.emoji || '📦'} ${res.commodity} @ ₹${res.evaluatedPrice}</h4>
-                <div style="font-size: 12px; color: var(--text-2);">Current Market Baseline: ₹${res.currentBaseline} ${res.unit || ''}</div>
+                <div style="font-size: 12px; color: var(--text-2);">Current Benchmark Baseline: ₹${res.currentBaseline} ${res.unit || ''}</div>
             </div>
-            <span class="badge badge-${res.status}">${res.status.toUpperCase()} DIAGNOSIS</span>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <span class="badge badge-neutral" style="font-size: 11px;">Client Demo Simulator</span>
+                <span class="badge badge-${res.status}">${res.status.toUpperCase()} DIAGNOSIS</span>
+            </div>
         </div>
 
         <div class="score-label-row">
@@ -832,6 +794,11 @@ function renderSimulatorResult(res) {
 
         <div class="eval-diagnosis ${res.status}">
             <strong>AI Assessment:</strong> ${res.diagnosis}
+        </div>
+
+        <div style="margin-top: 14px; padding: 10px 14px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-card); border-radius: 8px; font-size: 11px; color: var(--text-3); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+            <span>ℹ️ <strong>Demonstration Engine:</strong> Evaluated using in-browser statistical threshold modeling.</span>
+            <span>Python Scikit-Learn Isolation Forest source code is available in the GitHub repository.</span>
         </div>
     `;
 }
@@ -1186,15 +1153,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     initChartDropdown();
     initWatchlistForm();
 
-    // 2. Sync with Backend API
-    const connected = await syncWithAPI();
-    if (connected) {
-        renderStatsOverview();
-        renderCommodityGrid();
-        renderAlertsFeed();
-        initComparisonSelectors();
-        initChartDropdown();
-    }
+    // 2. Activate Static Demonstration Mode (Zero backend dependency)
+    initStaticMode();
 
     // 3. Search & Filter Handlers
     const searchInput = document.getElementById("commodity-search");
